@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     if (!response.ok) throw new Error('Clay API request failed');
     const data = await response.json();
     res.status(200).json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to process request' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 }
