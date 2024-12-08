@@ -4,21 +4,31 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('Sending to Clay:', req.body);
-    const response = await fetch('https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-db7d0eeb-5854-4f24-ab5d-29de76efda46', {
+    console.log('Request body:', req.body);
+    
+    const clayResponse = await fetch('https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-db7d0eeb-5854-4f24-ab5d-29de76efda46', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify({
+        URL: req.body.URL,
+        'Primary Keyword': req.body['Primary Keyword']
+      })
     });
 
-    if (!response.ok) throw new Error('Clay API request failed');
+    console.log('Clay status:', clayResponse.status);
     
-    const data = await response.json();
-    console.log('Clay response:', data);
+    if (!clayResponse.ok) {
+      const errorText = await clayResponse.text();
+      console.error('Clay error:', errorText);
+      throw new Error(`Clay API failed: ${clayResponse.status}`);
+    }
+    
+    const data = await clayResponse.json();
+    console.log('Clay response data:', data);
 
-    // Extract the fields we want from the Clay response
     const result = {
       'Current Product Name': data['Current Product Name'] || '',
       'Clean Title': data['Clean Title'] || '',
@@ -26,10 +36,13 @@ export default async function handler(req, res) {
       'Clean H1 Tag': data['Clean H1 Tag'] || ''
     };
 
-    console.log('Sending back to frontend:', result);
+    console.log('Sending result:', result);
     res.status(200).json(result);
   } catch (err) {
-    console.error('API Error:', err);
-    res.status(500).json({ error: err.message });
+    console.error('Detailed error:', err);
+    res.status(500).json({ 
+      error: err.message,
+      details: err.toString()
+    });
   }
 }
