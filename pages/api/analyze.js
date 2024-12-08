@@ -13,9 +13,20 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) throw new Error('Clay API request failed');
+    
     const data = await response.json();
-    res.status(200).json(data);
+
+    // Extract the fields we want from the Clay response
+    const result = {
+      'Current Product Name': data['Current Product Name'] || '',
+      'Clean Title': data['Clean Title'] || '',
+      'Clean Desc.': data['Clean Desc.'] || '',
+      'Clean H1 Tag': data['Clean H1 Tag'] || ''
+    };
+
+    res.status(200).json(result);
   } catch (err) {
+    console.error('API Error:', err);
     res.status(500).json({ error: err.message });
   }
 }
