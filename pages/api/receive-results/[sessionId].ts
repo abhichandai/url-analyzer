@@ -8,11 +8,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const { sessionId } = req.query;
-    // Store results with 30 minute expiration
-    await redis.setex(`results:${sessionId}`, 1800, JSON.stringify(req.body));
+    
+    // Set shorter timeout and immediate response
+    const storePromise = redis.setex(`results:${sessionId}`, 1800, JSON.stringify(req.body));
+    
+    // Respond immediately without waiting for Redis
     res.status(200).json({ success: true });
+    
+    // Let Redis operation complete in background
+    await storePromise;
   } catch (error) {
     console.error('Redis error:', error);
-    res.status(500).json({ error: 'Failed to store results' });
+    // Only send error if we haven't sent response yet
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to store results' });
+    }
   }
 }
