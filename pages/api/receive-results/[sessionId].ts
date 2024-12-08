@@ -1,7 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-
-// In-memory storage (replace with Redis/DB in production)
-const results = new Map();
+import redis from '../../../lib/redis';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -9,10 +7,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Store the results from Zapier
-    results.set(req.query.sessionId, req.body);
+    const { sessionId } = req.query;
+    // Store results with 30 minute expiration
+    await redis.setex(`results:${sessionId}`, 1800, JSON.stringify(req.body));
     res.status(200).json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error('Redis error:', error);
     res.status(500).json({ error: 'Failed to store results' });
   }
 }
