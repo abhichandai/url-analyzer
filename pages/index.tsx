@@ -41,27 +41,28 @@ export default function Home() {
     return () => clearInterval(pollInterval);
   }, [sessionId, loading]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setResult(null);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setResult(null);
+  
+  try {
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
     
-    try {
-      // Generate a new session ID
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      
-      if (!response.ok) throw new Error('Analysis failed');
-      const data = await response.json();
-      setSessionId(data.sessionId);
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-    }
-  };
+    if (!response.ok) throw new Error('Analysis failed');
+    const data = await response.json();
+    console.log('Generated sessionId:', data.sessionId); // Log sessionId
+    setSessionId(data.sessionId);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main className="min-h-screen bg-gray-50 p-4">
