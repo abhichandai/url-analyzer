@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 interface AnalysisResult {
@@ -15,30 +15,53 @@ export default function Home() {
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  setResult(null);
-  
-  try {
-    console.log('Sending request:', formData);
-    const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
+  // Poll for results when we have a sessionId
+  useEffect(() => {
+    if (!sessionId || !loading) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/check-results/${sessionId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.result) {
+            setResult(data.result);
+            setLoading(false);
+            clearInterval(pollInterval);
+          }
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    }, 5000); // Poll every 5 seconds
+
+    // Cleanup interval
+    return () => clearInterval(pollInterval);
+  }, [sessionId, loading]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setResult(null);
     
-    if (!response.ok) throw new Error('Analysis failed');
-    const data = await response.json();
-    console.log('Received response:', data);
-    setResult(data);
-  } catch (err) {
-    console.error('Error:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      // Generate a new session ID
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      
+      if (!response.ok) throw new Error('Analysis failed');
+      const data = await response.json();
+      setSessionId(data.sessionId);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-gray-50 p-4">
@@ -84,7 +107,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             </button>
           </form>
 
-          {/* Results Table */}
           <div className="mt-8">
             <h2 className="text-xl font-semibold mb-4">Current Information</h2>
             <div className="overflow-x-auto">
