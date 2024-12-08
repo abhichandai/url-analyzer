@@ -16,27 +16,29 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setResult(null);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setResult(null);
+  
+  try {
+    console.log('Sending request:', formData);
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
     
-    try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      
-      if (!response.ok) throw new Error('Analysis failed');
-      const data = await response.json();
-      setResult(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (!response.ok) throw new Error('Analysis failed');
+    const data = await response.json();
+    console.log('Received response:', data);
+    setResult(data);
+  } catch (err) {
+    console.error('Error:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main className="min-h-screen bg-gray-50 p-4">

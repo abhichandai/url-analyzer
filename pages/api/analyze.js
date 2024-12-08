@@ -4,6 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log('Sending to Clay:', req.body);
     const response = await fetch('https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-db7d0eeb-5854-4f24-ab5d-29de76efda46', {
       method: 'POST',
       headers: {
@@ -15,6 +16,7 @@ export default async function handler(req, res) {
     if (!response.ok) throw new Error('Clay API request failed');
     
     const data = await response.json();
+    console.log('Clay response:', data);
 
     // Extract the fields we want from the Clay response
     const result = {
@@ -24,6 +26,7 @@ export default async function handler(req, res) {
       'Clean H1 Tag': data['Clean H1 Tag'] || ''
     };
 
+    console.log('Sending back to frontend:', result);
     res.status(200).json(result);
   } catch (err) {
     console.error('API Error:', err);
