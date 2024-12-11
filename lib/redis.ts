@@ -1,3 +1,5 @@
+// lib/redis.ts
+
 async function setKey(key: string, value: string) {
   const response = await fetch(process.env.UPSTASH_REST_URL!, {
     method: 'POST',
@@ -28,7 +30,9 @@ async function getKey(key: string) {
       key
     ])
   });
-  return response.json();
+  const data = await response.json();
+  console.log('Upstash GET response:', data);  // Add this line
+  return data;
 }
 
 export { setKey, getKey };
