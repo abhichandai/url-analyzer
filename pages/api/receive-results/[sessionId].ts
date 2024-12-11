@@ -1,3 +1,6 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import redis from '../../../lib/redis';
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -25,9 +28,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Verification - stored data:', stored);
     console.log('=== END ZAPIER WEBHOOK ===');
 
-    res.status(200).json({ success: true });
-  } catch (error) {
-    console.error('Detailed webhook error:', error);
-    res.status(500).json({ error: String(error) });
-  }
-}
+    res.status(200).json({
