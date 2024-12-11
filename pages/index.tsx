@@ -18,28 +18,34 @@ export default function Home() {
   const [sessionId, setSessionId] = useState<string | null>(null);
 
   // Poll for results when we have a sessionId
-  useEffect(() => {
-    if (!sessionId || !loading) return;
+useEffect(() => {
+  if (!sessionId || !loading) {
+    console.log('Not polling:', { sessionId, loading });
+    return;
+  }
 
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/check-results/${sessionId}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.result) {
-            setResult(data.result);
-            setLoading(false);
-            clearInterval(pollInterval);
-          }
+  console.log('Starting to poll with sessionId:', sessionId);
+  
+  const pollInterval = setInterval(async () => {
+    try {
+      console.log('Polling attempt for sessionId:', sessionId);
+      const response = await fetch(`/api/check-results/${sessionId}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Poll response:', data);
+        if (data.result) {
+          setResult(data.result);
+          setLoading(false);
+          clearInterval(pollInterval);
         }
-      } catch (error) {
-        console.error('Polling error:', error);
       }
-    }, 5000); // Poll every 5 seconds
+    } catch (error) {
+      console.error('Polling error:', error);
+    }
+  }, 5000);
 
-    // Cleanup interval
-    return () => clearInterval(pollInterval);
-  }, [sessionId, loading]);
+  return () => clearInterval(pollInterval);
+}, [sessionId, loading]);
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
