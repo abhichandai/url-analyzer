@@ -5,31 +5,14 @@ if (!process.env.REDIS_URL) {
 }
 
 const redis = new Redis(process.env.REDIS_URL, {
-  retryStrategy: (times) => {
-    const delay = Math.min(times * 50, 2000);
-    return delay;
-  },
-  maxRetriesPerRequest: 3,
-  enableReadyCheck: true,
-  reconnectOnError: (err) => {
-    const targetError = 'READONLY';
-    if (err.message.includes(targetError)) {
-      return true;
-    }
-    return false;
-  }
+  retryStrategy: () => 2000,
+  maxRetriesPerRequest: 10,
+  connectTimeout: 10000,
+  lazyConnect: true
 });
 
-redis.on('error', (error) => {
-  console.error('Redis error:', error);
-});
-
-redis.on('connect', () => {
-  console.log('Redis connected');
-});
-
-redis.on('ready', () => {
-  console.log('Redis ready');
-});
+// Log connection events
+redis.on('connect', () => console.log('Redis Connected'));
+redis.on('error', (err) => console.error('Redis Error:', err));
 
 export default redis;
