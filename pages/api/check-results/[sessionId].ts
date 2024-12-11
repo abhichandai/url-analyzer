@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import redis from '../../../lib/redis';
+import { getKey } from '../../../lib/redis';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -9,8 +9,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { sessionId } = req.query;
     console.log('Checking results for sessionId:', sessionId);
-    const result = await redis.get(`results:${sessionId}`);
+    
+    const result = await getKey(`results:${sessionId}`);
     console.log('Found result:', result);
+    
     res.status(200).json({ result: result ? JSON.parse(result) : null });
   } catch (error) {
     console.error('Redis error:', error);

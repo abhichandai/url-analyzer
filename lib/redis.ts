@@ -1,18 +1,34 @@
-import { Redis } from 'ioredis';
-
-if (!process.env.REDIS_URL) {
-  throw new Error('REDIS_URL is not defined');
+async function setKey(key: string, value: string) {
+  const response = await fetch(process.env.UPSTASH_REST_URL!, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REST_TOKEN!}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify([
+      'SET',
+      key,
+      value,
+      'EX',
+      1800
+    ])
+  });
+  return response.json();
 }
 
-const redis = new Redis(process.env.REDIS_URL, {
-  retryStrategy: () => 2000,
-  maxRetriesPerRequest: 10,
-  connectTimeout: 10000,
-  lazyConnect: true
-});
+async function getKey(key: string) {
+  const response = await fetch(process.env.UPSTASH_REST_URL!, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REST_TOKEN!}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify([
+      'GET',
+      key
+    ])
+  });
+  return response.json();
+}
 
-// Log connection events
-redis.on('connect', () => console.log('Redis Connected'));
-redis.on('error', (err) => console.error('Redis Error:', err));
-
-export default redis;
+export { setKey, getKey };
