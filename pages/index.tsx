@@ -20,16 +20,14 @@ export default function Home() {
   // Poll for results when we have a sessionId
 useEffect(() => {
   if (!sessionId || !loading) {
-    console.log('Not polling:', { sessionId, loading });
     return;
   }
 
-  console.log('Starting to poll with sessionId:', sessionId);
-  
+  console.log('Starting polling with sessionId:', sessionId);
   const pollInterval = setInterval(async () => {
     try {
-      console.log('Polling attempt for sessionId:', sessionId);
       const response = await fetch(`/api/check-results/${sessionId}`);
+      console.log('Polling response status:', response.status);
       if (response.ok) {
         const data = await response.json();
         console.log('Poll response:', data);
@@ -44,7 +42,10 @@ useEffect(() => {
     }
   }, 5000);
 
-  return () => clearInterval(pollInterval);
+  return () => {
+    console.log('Cleaning up poll interval');
+    clearInterval(pollInterval);
+  };
 }, [sessionId, loading]);
 
 const handleSubmit = async (e: React.FormEvent) => {
