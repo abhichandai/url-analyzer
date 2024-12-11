@@ -6,14 +6,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Generate a session ID
     const sessionId = crypto.randomUUID();
-
-    // Send to Clay with sessionId
+    console.log('Analyze endpoint - Generated sessionId:', sessionId);
+    
     await fetch('https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-db7d0eeb-5854-4f24-ab5d-29de76efda46', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         ...req.body,
@@ -21,7 +20,7 @@ export default async function handler(req, res) {
       })
     });
 
-    // Return the sessionId to the client
+    // Send back sessionId
     res.status(200).json({ sessionId });
   } catch (err) {
     console.error('API Error:', err);

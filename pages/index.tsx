@@ -49,10 +49,12 @@ useEffect(() => {
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-  setLoading(true);
+  setLoading(true);  // Set loading first
   setResult(null);
+  setSessionId(null); // Reset sessionId
   
   try {
+    console.log('Submitting form...');
     const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -61,11 +63,18 @@ const handleSubmit = async (e: React.FormEvent) => {
     
     if (!response.ok) throw new Error('Analysis failed');
     const data = await response.json();
-    console.log('Generated sessionId:', data.sessionId);
-    setSessionId(data.sessionId);
+    console.log('Response from analyze:', data);
+    
+    if (data.sessionId) {
+      setSessionId(data.sessionId);
+      console.log('Set sessionId:', data.sessionId);
+    } else {
+      throw new Error('No sessionId received');
+    }
   } catch (err) {
-    console.error(err);
-    setLoading(false); // Only set loading to false on error
+    console.error('Submit error:', err);
+    setLoading(false);
+    setSessionId(null);
   }
 };
 
