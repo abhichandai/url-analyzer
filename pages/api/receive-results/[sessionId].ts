@@ -28,4 +28,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Verification - stored data:', stored);
     console.log('=== END ZAPIER WEBHOOK ===');
 
-    res.status(200).json({
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Detailed webhook error:', error);
+    res.status(500).json({ error: String(error) });
+  }
+}
