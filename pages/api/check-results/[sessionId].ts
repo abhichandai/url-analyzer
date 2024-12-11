@@ -10,12 +10,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { sessionId } = req.query;
     console.log('Checking results for sessionId:', sessionId);
     
-    const result = await getKey(`results:${sessionId}`);
-    console.log('Found result:', result);
+    // Get data from Redis
+    const rawResult = await getKey(`results:${sessionId}`);
+    console.log('Raw Redis response:', rawResult);
+
+    // The Upstash REST API returns the result in a specific format
+    // If it's a string (our JSON data), it will be in result[1]
+    const result = Array.isArray(rawResult) ? rawResult[1] : null;
     
-    res.status(200).json({ result: result ? JSON.parse(result) : null });
+    if (result) {
+      // Parse the stored JSON string
+      const parsedResult = JSON.parse(result);
+      console.log('Parsed result:', parsedResult);
+      res.status(200).json({ result: parsedResult });
+    } else {
+      res.status(200).json({ result: null });
+    }
   } catch (error) {
-    console.error('Redis error:', error);
+    console.error('Check results error:', error);
     res.status(500).json({ error: 'Failed to check results' });
   }
 }
