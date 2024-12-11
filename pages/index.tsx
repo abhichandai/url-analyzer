@@ -55,14 +55,14 @@ const handleSubmit = async (e: React.FormEvent) => {
     
     if (!response.ok) throw new Error('Analysis failed');
     const data = await response.json();
-    console.log('Generated sessionId:', data.sessionId); // Log sessionId
+    console.log('Generated sessionId:', data.sessionId);
     setSessionId(data.sessionId);
   } catch (err) {
     console.error(err);
-  } finally {
-    setLoading(false);
+    setLoading(false); // Only set loading to false on error
   }
 };
+
   return (
     <main className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto">
