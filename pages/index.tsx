@@ -13,6 +13,7 @@ interface AnalysisResult {
   'Opt. Desc 2': string;
   'Opt. Desc 3': string;
   'Opt. H1': string;
+  [key: string]: string; // Add index signature for dynamic access
 }
 
 export default function Home() {
@@ -202,7 +203,7 @@ export default function Home() {
                     {loading ? (
                       <Loader2 className="animate-spin h-4 w-4" />
                     ) : (
-                      result?.[`Opt. Title ${num}`] || '-'
+                      result?.[`Opt. Title ${num}` as keyof AnalysisResult] || '-'
                     )}
                   </div>
                 ))}
@@ -218,7 +219,7 @@ export default function Home() {
                     {loading ? (
                       <Loader2 className="animate-spin h-4 w-4" />
                     ) : (
-                      result?.[`Opt. Desc ${num}`] || '-'
+                      result?.[`Opt. Desc ${num}` as keyof AnalysisResult] || '-'
                     )}
                   </div>
                 ))}
