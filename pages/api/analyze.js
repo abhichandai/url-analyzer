@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     const sessionId = crypto.randomUUID();
     console.log('Analyze endpoint - Generated sessionId:', sessionId);
     
-    await fetch('https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-db7d0eeb-5854-4f24-ab5d-29de76efda46', {
+    await fetch('https://api.clay.com/v3/sources/webhook/pull-in-data-from-a-webhook-ac1ce9f9-5989-4521-b5fe-97412ed4d58a', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
